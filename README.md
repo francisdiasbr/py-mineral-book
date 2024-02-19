@@ -1,4 +1,4 @@
-# Mineral-book
+# 🔮  Mineral-book
 
 *Este código é uma solução completa para extrair, processar, armazenar e buscar informações sobre minerais de forma semântica. Ele ilustra a aplicação de técnicas de NLP e busca semântica em conjuntos de dados reais, proporcionando uma base para sistemas de recomendação, busca aprimorada e análise de texto.*
 
