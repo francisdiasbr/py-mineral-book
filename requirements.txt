@@ -1,0 +1,7 @@
+flask
+numpy
+pandas
+python-dotenv
+requests
+pymongo
+OpenAI
