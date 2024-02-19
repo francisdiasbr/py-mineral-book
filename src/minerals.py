@@ -16,6 +16,10 @@ def extract_item(url):
 
     content_div = soup.find('div', class_='mw-content-ltr mw-parser-output')
     paragraph_content = ''
+    
+    image_td = soup.find('td', class_='infobox-image')
+    image_url = ''
+    image_caption = ''
 
     if content_div:
         first_h2 = content_div.find('h2')
@@ -24,7 +28,15 @@ def extract_item(url):
             if next_p:
                 paragraph_content = next_p.get_text(strip=True)
     
-    return paragraph_content
+    if image_td:
+        image_tag = image_td.find('img')
+        if image_tag and 'src' in image_tag.attrs:
+            image_url = f"https:{image_tag['src']}"
+        caption_div = image_td.find('div', class_='infobox-caption')
+        if caption_div:
+            image_caption = caption_div.get_text(strip=True)
+
+    return paragraph_content, image_url, image_caption
 
 def extract_list(max):
     url = 'https://en.wikipedia.org/wiki/List_of_minerals'
@@ -114,13 +126,15 @@ def sync_minerals(max):
     minerals = extract_list(max)
     for mineral_name, mineral_url in minerals.items():
         print('Syncing mineral:', mineral_name)
-        extracted_info = extract_item(mineral_url)
+        extracted_info, image_url, image_caption = extract_item(mineral_url)
         print('Extracted Info:', extracted_info)
         # Prepara o documento para inserir no MongoDB
         mineral_document = {
             "name": mineral_name,
             "url": mineral_url,
-            "description": extracted_info
+            "description": extracted_info,
+            "image_url": image_url,  
+            "image_caption": image_caption  
         }
         save_minerals(mineral_document)
         
