@@ -123,8 +123,6 @@ def search_minerals(filters={}, search_text=''):
             vector_name_similarity = calculate_cosine_similarity(search_embedding, item_vector_name)
 
             # set similarity in searched item
-            item['name_similarity'] = vector_name_similarity
-
             item['similarity'] = vector_name_similarity
 
             # verifica se a similaridade é maior que 40%
@@ -146,10 +144,18 @@ def sync_minerals(max):
         print('Syncing mineral:', mineral_name)
         properties = extract_item(mineral_url)
         print('Extracted Info:', properties)
+
+        # Cria um novo dicionário para as propriedades convertidas
+        converted_properties = {}
+        for key, value in properties.items():
+            # Converte cada chave para minúsculas e substitui espaços por underscores
+            converted_key = key.replace(' ', '_').lower()
+            converted_properties[converted_key] = value
+
         mineral_document = {
             "name": mineral_name,
             "url": mineral_url,
-            **properties
+            **converted_properties
         }
         save_minerals(mineral_document)
         
