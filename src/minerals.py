@@ -43,16 +43,28 @@ def extract_list(max):
     response = requests.get(url)
     soup = BeautifulSoup(response.text, 'lxml')
 
-    minerals_div = soup.find('div', class_='div-col')
-    mineral_links = minerals_div.find_all('li')[:max]
-    
     minerals = {}
-    for link in mineral_links:
-        a = link.find('a')
-        if a and 'href' in a.attrs:
-            mineral_name = a.text.strip()
-            mineral_url = f"https://en.wikipedia.org{a['href']}"
-            minerals[mineral_name] = mineral_url
+    # Alteração aqui: usando find_all para pegar todas as divs
+    minerals_divs = soup.find_all('div', class_='div-col')
+    
+    # Iterando por cada div encontrada
+    for div in minerals_divs:
+        mineral_links = div.find_all('li')
+        
+        # Ajuste para garantir que não ultrapasse o máximo definido
+        for link in mineral_links[:max]:
+            a = link.find('a')
+            if a and 'href' in a.attrs:
+                mineral_name = a.text.strip()
+                mineral_url = f"https://en.wikipedia.org{a['href']}"
+                minerals[mineral_name] = mineral_url
+            # Decrementa max para garantir que a contagem total não exceda o máximo
+            max -= 1
+            if max <= 0:
+                break
+        if max <= 0:
+            break
+
     return minerals
 
 def save_minerals(document):
