@@ -117,21 +117,20 @@ def search_minerals(filters={}, search_text=''):
             item['name_similarity'] = vector_name_similarity
             item['description_similarity'] = vector_description_similarity
 
-            # order index
+            # Use a maior similaridade entre nome e descrição para o filtro
             item['similarity'] = vector_name_similarity
 
-            # if similarity > float(0.1): search_result.append(item)
+            # Ajuste: verifica se a similaridade é maior que 80%
+            if item['similarity'] > 0.4:
+                search_result.append(item)
         else:
-            item['similarity'] = 1
-            
-        # sheck threshold before append 
-        item['vector_name'] = True
-        item['vector_description'] = True
-        search_result.append(item)
+            # Se não houver texto de busca, considera-se a similaridade como 1 para manter o item na lista
+            search_result.append(item)
 
-    # sort search result
+            # Ordena os resultados pela similaridade, do maior para o menor
     search_result.sort(key=lambda x: x['similarity'], reverse=True)
-    
+    search_result = search_result[:10]
+
     return search_result
 
 def sync_minerals(max):
