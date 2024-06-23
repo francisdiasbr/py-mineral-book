@@ -1,14 +1,19 @@
 import numpy as np
-
 import requests
-
+import re
 from bs4 import BeautifulSoup
-
 from bson import ObjectId
-
 from config import get_mongo_collection
-
 from src.embbedings import calculate_cosine_similarity, generate_embedding
+
+def clean_text(text):
+    # Remove múltiplos espaços
+    text = re.sub(r'\s+', ' ', text)
+    # Adiciona espaços após pontuações se necessário
+    text = re.sub(r'([.,!?;:])([^\s])', r'\1 \2', text)
+    # Corrige formatação de fórmulas químicas
+    text = re.sub(r'(\d)([A-Za-z])', r'\1 \2', text)  # Espaço entre números e letras (simples ajuste)
+    return text.strip()
 
 def extract_item(url):
     response = requests.get(url)
@@ -36,6 +41,7 @@ def extract_item(url):
         'Absorption spectra': None,
         'image_url': '',
         'image_caption': '',
+        'description_paragraph': ''
     }
 
     rows = soup.find_all('tr')
@@ -45,6 +51,17 @@ def extract_item(url):
         if header and data and header.text.strip() in properties:
             properties[header.text.strip()] = data.text.strip()
     
+        # Encontrar a última tag <tr>
+    if rows:
+        last_tr = rows[-2]
+        
+        description_paragraph = last_tr.find_next('p')
+        if description_paragraph:
+            paragraph_text = description_paragraph.get_text(separator=' ', strip=True)
+            cleaned_text = clean_text(paragraph_text)
+            print("cleaned:", cleaned_text)  # Dar console no primeiro parágrafo
+            properties['description_paragraph'] = cleaned_text
+
     image_td = soup.find('td', class_='infobox-image')
     if image_td:
         image_tag = image_td.find('img')
