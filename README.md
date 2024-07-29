@@ -1,5 +1,5 @@
 
-- **Português**: [Leia o README em português](README_PT.md)
+- **Portuguese**: [Leia o README em português](README_PT.md)
 
 # 🔮 Mineral-book
 
