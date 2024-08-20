@@ -8,7 +8,8 @@ app = Flask(__name__)
 def post_search_minerals():
     data = request.json
     search_filters = data.get('filters', {})
-    search_text = request.args.get('text', '')
+    search_text = data.get('search_text', '')
+
     try:
         minerals = search_minerals(search_filters, search_text)
         return jsonify({"success": True, "payload": minerals}), 200
@@ -26,4 +27,4 @@ def route_sync_minerals():
     return jsonify({"payload": payload}), 200
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, port=5002)
