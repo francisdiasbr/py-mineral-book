@@ -4,7 +4,7 @@ import re
 from bs4 import BeautifulSoup
 from bson import ObjectId
 from config import get_mongo_collection
-from src.embbedings import calculate_cosine_similarity, generate_embedding
+from src.embbedings import calculate_cosine_similarity, generate_embedding, calculate_string_similarity
 
 def clean_text(text):
     # Remove múltiplos espaços
@@ -126,30 +126,33 @@ def search_minerals(filters={}, search_text=''):
     # search with embedding
     if search_text:
         search_embedding = generate_embedding(search_text)
+        print('search_embedding', search_embedding)
 
     # result array
     search_result = []
 
     # find and search items in collection
     for item in collection.find(filters):
-        # serialize object id key
         item['_id'] = str(item['_id'])
         if search_text:
-            item_vector_name = np.array(item.get('vector_name', False))
-
-            vector_name_similarity = calculate_cosine_similarity(search_embedding, item_vector_name)
-
-            # set similarity in searched item
-            item['similarity'] = vector_name_similarity
-
-            # verifica se a similaridade é maior que 40%
+            item_vector_name = item.get('vector_name')
+            if item_vector_name is None or not item_vector_name:
+                print(f"Item {item['_id']} não tem vetor de nome")
+                continue
+            
+            try:
+                vector_name_similarity = calculate_cosine_similarity(search_embedding, item_vector_name)
+                string_similarity = calculate_string_similarity(search_text, item['name'])
+                item['similarity'] = 0.7 * vector_name_similarity + 0.3 * string_similarity
+            except Exception as e:
+                print(f"Erro ao calcular similaridade para o item {item['_id']}: {e}")
+                continue
+            
             if item['similarity'] > 0.4:
                 search_result.append(item)
         else:
-            # Se não houver texto de busca, considera-se a similaridade como 1 para manter o item na lista
             search_result.append(item)
 
-            # Ordena os resultados pela similaridade, do maior para o menor
     search_result.sort(key=lambda x: x['similarity'], reverse=True)
     search_result = search_result[:10]
 

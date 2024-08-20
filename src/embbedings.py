@@ -1,6 +1,8 @@
 import numpy as np
 
 from config import get_openai_client
+from difflib import SequenceMatcher
+
 
 def calculate_cosine_similarity(vec_a, vec_b):
     """
@@ -10,6 +12,14 @@ def calculate_cosine_similarity(vec_a, vec_b):
     norm_a = np.linalg.norm(vec_a)
     norm_b = np.linalg.norm(vec_b)
     return dot_product / (norm_a * norm_b)
+
+
+def calculate_string_similarity(str1, str2):
+    """
+    Calcula a similaridade de string usando uma métrica simples de similaridade de sequência.
+    """
+    return SequenceMatcher(None, str1, str2).ratio()
+
 
 def generate_embedding(text):
     """
@@ -22,6 +32,7 @@ def generate_embedding(text):
     norm_dim = normalize_l2(cut_dim)  # Normaliza o vetor reduzido.
 
     return norm_dim
+
 
 def normalize_l2(x):
     """
